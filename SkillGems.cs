@@ -71,7 +71,7 @@ namespace SkillGems
 
             if (!gemsToLvlUpElements.Any()) return;
 
-            GemLevelUpElement elementToClick = (GemLevelUpElement)(gemsToLvlUpElements.ToList().FirstOrDefault()?.GetChildAtIndex(1));
+            GemLevelUpElement elementToClick = gemsToLvlUpElements.ToList().FirstOrDefault();
 
             var ActionDelay = Settings.DelayBetweenEachMouseEvent.Value;
             var GemDelay = Settings.DelayBetweenEachGemClick.Value;
