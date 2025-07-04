@@ -76,10 +76,8 @@ namespace SkillGems
 
             if (Settings.UseMagicInput.Value)
             {
-                // Use MagicInput for gem leveling
                 GameController.PluginBridge.GetMethod<Action<GemLevelUpElement>>("MagicInput.GemLevelUp")(elementToClick);
 
-                // Still apply gem delay if configured
                 var GemDelay = Settings.DelayBetweenEachGemClick.Value;
                 if (Settings.AddPingIntoDelay.Value)
                 {
@@ -89,7 +87,6 @@ namespace SkillGems
             }
             else
             {
-                // Original mouse clicking logic
                 var ActionDelay = Settings.DelayBetweenEachMouseEvent.Value;
                 var GemDelay = Settings.DelayBetweenEachGemClick.Value;
 
