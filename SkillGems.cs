@@ -99,7 +99,7 @@ namespace SkillGems
                     GemDelay += GameController.IngameState.ServerData.Latency;
                 }
 
-                SetCursorPos(elementToClick);
+                SetCursorPos(elementToClick?.GetChildAtIndex(1));
                 await Task.Delay(ActionDelay);
                 Input.LeftDown();
                 await Task.Delay(ActionDelay);
