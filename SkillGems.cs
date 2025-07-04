@@ -46,7 +46,7 @@ namespace SkillGems
 
         public override Job Tick()
         {
-            if (!Input.IsKeyDown(Settings.Run.Value) || !PanelVisible())
+            if ((!Input.IsKeyDown(Settings.Run.Value) && !Settings.UseMagicInput.Value) || !PanelVisible())
             {
                 _gemLevelingCts?.Cancel();
             }
@@ -58,7 +58,8 @@ namespace SkillGems
                 _gemLevelingTask.ContinueWith((task) =>
                 {
                     _gemLevelingTask = null;
-                    SetCursorPos(_mousePosition);
+                    if (!Settings.UseMagicInput.Value)
+                        SetCursorPos(_mousePosition);
                 });
             }
 
@@ -73,23 +74,38 @@ namespace SkillGems
 
             GemLevelUpElement elementToClick = gemsToLvlUpElements.ToList().FirstOrDefault();
 
-            var ActionDelay = Settings.DelayBetweenEachMouseEvent.Value;
-            var GemDelay = Settings.DelayBetweenEachGemClick.Value;
-
-            if (Settings.AddPingIntoDelay.Value)
+            if (Settings.UseMagicInput.Value)
             {
-                ActionDelay += GameController.IngameState.ServerData.Latency;
-                GemDelay += GameController.IngameState.ServerData.Latency;
-            }
+                // Use MagicInput for gem leveling
+                GameController.PluginBridge.GetMethod<Action<GemLevelUpElement>>("MagicInput.GemLevelUp")(elementToClick);
 
-            // TODO: Somehow use set cursor pos as a fallback
-            GameController.PluginBridge.GetMethod<Action<GemLevelUpElement>>("MagicInput.GemLevelUp")(elementToClick);
-            // SetCursorPos(elementToClick);
-            // await Task.Delay(ActionDelay);
-            // Input.LeftDown();
-            // await Task.Delay(ActionDelay);
-            // Input.LeftUp();
-            await Task.Delay(GemDelay);
+                // Still apply gem delay if configured
+                var GemDelay = Settings.DelayBetweenEachGemClick.Value;
+                if (Settings.AddPingIntoDelay.Value)
+                {
+                    GemDelay += GameController.IngameState.ServerData.Latency;
+                }
+                await Task.Delay(GemDelay);
+            }
+            else
+            {
+                // Original mouse clicking logic
+                var ActionDelay = Settings.DelayBetweenEachMouseEvent.Value;
+                var GemDelay = Settings.DelayBetweenEachGemClick.Value;
+
+                if (Settings.AddPingIntoDelay.Value)
+                {
+                    ActionDelay += GameController.IngameState.ServerData.Latency;
+                    GemDelay += GameController.IngameState.ServerData.Latency;
+                }
+
+                SetCursorPos(elementToClick);
+                await Task.Delay(ActionDelay);
+                Input.LeftDown();
+                await Task.Delay(ActionDelay);
+                Input.LeftUp();
+                await Task.Delay(GemDelay);
+            }
 
             if (cancellationToken.IsCancellationRequested) return;
         }
